@@ -1,23 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import NoteForm from "./components/NoteForm";
+import NoteList from "./components/NoteList";
 
 function App() {
+ const [note,setNote] = useState([])
+
+  const addNote = async(note)=>{
+    await fetch('/add-note',{
+      method:'POST',
+      headers:{'Content-Type': 'application/json'},
+      body:JSON.stringify(note)
+    }) 
+    getNote()
+  }
+
+  const getNote = async()=>{
+   const res= await fetch('/note')
+   const data = await res.json()
+   setNote(data)
+  }  
+
+  const deleteNote = async(id)=>{    
+    await fetch(`/delete?id=${id}`,{
+      method:'DELETE'
+    })
+
+    getNote()
+  }
+
+  useEffect(() => {
+   getNote()
+  },[])
+  
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>hi note app</h1>
+      <NoteForm onAdd={addNote}/>
+      <NoteList note={note} onDelete={deleteNote}/>
+      
     </div>
   );
 }
